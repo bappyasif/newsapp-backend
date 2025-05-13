@@ -1,6 +1,7 @@
 // server.js or routes/resume.js
 import express, { Request, Response } from 'express';
 import { GoogleGenerativeAI } from '@google/generative-ai';
+import { geminiResumePromptForExtraction, geminiResumePromptForFeedback, geminiResumePromptInOneGo } from '../prompts';
 
 const router = express.Router();
 // const genAI = new GoogleGenerativeAI(process.env.GEMINI_FLASH2_0_LITE_API_KEY!);
@@ -25,6 +26,86 @@ if (!apiKey) {
 const genAI = apiKey ? new GoogleGenerativeAI(apiKey) : null;
 const model = genAI ? genAI.getGenerativeModel({ model: 'gemini-1.5-flash-latest' }) : null;
 
+router.post('/extraction', async (req: any, res: any) => {
+  try {
+    const { text, role } = req.body;
+
+    if(!role) return res.status(400).json({ error: "No role provided." });
+
+    if (!text) return res.status(400).json({ error: "No resume text provided." });
+
+    const prompt = geminiResumePromptForExtraction(text, role);
+    
+    const result = await model?.generateContent(prompt);
+    const responseText = result?.response.text();
+
+    if (!result || !responseText) {
+      console.error("No response or text from Gemini model.");
+      return res.status(500).json({ error: "Failed to get a response from Gemini model." });
+    }
+
+    // Clean the responseText to remove potential markdown code block fences
+    let cleanedJsonString = responseText;
+    const jsonBlockMatch = responseText.match(/```json\s*([\s\S]*?)\s*```/);
+
+    if (jsonBlockMatch && jsonBlockMatch[1]) {
+      cleanedJsonString = jsonBlockMatch[1];
+    } else {
+      // If no markdown block is found, try to trim whitespace as a fallback
+      cleanedJsonString = responseText.trim();
+    }
+
+    const parsedOutput = JSON.parse(cleanedJsonString);
+
+    console.log("Parsed Output:", parsedOutput?.name, parsedOutput?.output);
+
+    res.json({ ...parsedOutput });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Gemini API error" });
+  }
+})
+
+router.post('/feedback', async (req: any, res: any) => {
+  try {
+    const { text, role } = req.body;
+
+    if(!role) return res.status(400).json({ error: "No role provided." });
+
+    if (!text) return res.status(400).json({ error: "No resume text provided." });
+
+    const prompt = geminiResumePromptForFeedback(text, role);
+    
+    const result = await model?.generateContent(prompt);
+    const responseText = result?.response.text();
+
+    if (!result || !responseText) {
+      console.error("No response or text from Gemini model.");
+      return res.status(500).json({ error: "Failed to get a response from Gemini model." });
+    }
+
+    // Clean the responseText to remove potential markdown code block fences
+    let cleanedJsonString = responseText;
+    const jsonBlockMatch = responseText.match(/```json\s*([\s\S]*?)\s*```/);
+
+    if (jsonBlockMatch && jsonBlockMatch[1]) {
+      cleanedJsonString = jsonBlockMatch[1];
+    } else {
+      // If no markdown block is found, try to trim whitespace as a fallback
+      cleanedJsonString = responseText.trim();
+    }
+
+    const parsedOutput = JSON.parse(cleanedJsonString);
+
+    console.log("Parsed Output for feedback:", parsedOutput);
+
+    res.json({ ...parsedOutput });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Gemini API error" });
+  }
+})
+
 router.post('/', async (req: any, res: any) => {
   try {
     const { text, role } = req.body;
@@ -33,22 +114,26 @@ router.post('/', async (req: any, res: any) => {
 
     if (!text) return res.status(400).json({ error: "No resume text provided." });
 
-    const prompt = `
-    Analyze this resume and extract:
-    - Name
-    - Email
-    - Phone
-    - Skills
-    - Experience
-    - Education
-    - Certifications
+    // const prompt = `
+    // Analyze this resume and extract:
+    // - Name
+    // - Email
+    // - Phone
+    // - Skills
+    // - Experience
+    // - Education
+    // - Certifications
 
-    when possible include improvements for role ${role} in skills required, experience, and education or certifications for resume feedback.
+    // when possible include improvements for role ${role} in skills required, experience, and education or certifications for resume feedback.
 
-    Format your response as a JSON object.
-    Resume Text:
-    ${text}
-    `;
+    // Format your response as a JSON object.
+    // Resume Text:
+    // ${text}
+    // `;
+
+    const prompt = geminiResumePromptForExtraction(text, role);
+    // const prompt = geminiResumePromptForFeedback(text, role);
+    // const prompt = geminiResumePromptInOneGo(text, role);
 
     const result = await model?.generateContent(prompt);
     const responseText = result?.response.text();
@@ -70,6 +155,8 @@ router.post('/', async (req: any, res: any) => {
     }
 
     const parsedOutput = JSON.parse(cleanedJsonString);
+
+    console.log("Parsed Output:", parsedOutput?.output?.name, parsedOutput?.output);
 
     res.json({ output: parsedOutput });
 

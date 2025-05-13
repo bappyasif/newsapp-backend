@@ -113,3 +113,56 @@ Compare and list the candidate's that are missing as a ${role} to common job rol
 
 Resume text to analyze: ${text}`
 }
+
+export const geminiResumePromptInOneGo = (text: string, role: string) => {
+    return `
+    Analyze this resume and extract:
+    - Name
+    - Email
+    - Phone
+    - Skills
+    - Experience
+    - Education
+    - Certifications
+
+    when possible include improvements for role ${role} in skills required, experience, and education or certifications for resume feedback.
+
+    Format your response as a JSON object.
+    Resume Text:
+    ${text}
+    `
+}
+
+export const geminiResumePromptForExtraction = (text: string, role: string) => {
+    return `
+    Analyze this resume and extract the following information:
+- Name
+- Email
+- Phone
+- Skills (as a list of strings)
+- Experience (as a list of objects, each detailing title, company, dates, and key responsibilities/achievements)
+- Education (as a list of objects, each detailing degree, institution, and dates)
+- Certifications (as a list of strings)
+
+Format your response strictly as a JSON object and turn those props keys in lowercase.
+Resume Text:
+${text}
+    `
+}
+
+export const geminiResumePromptForFeedback = (text: string, role: string) => {
+    return `
+    Given the following resume text for a candidate interested in a "${role}" position:
+---
+Resume Text:
+${text}
+---
+
+Provide actionable feedback and suggestions for improvement related to the "${role}". Focus on:
+- Skills: Identify any crucial skills for a ${role} that are missing or could be highlighted better. Suggest relevant skills to develop.
+- Experience: How can the candidate better tailor their experience presentation for a ${role}? Suggest ways to quantify achievements.
+- Education/Certifications: Are there any additional educational qualifications or certifications that would be beneficial for a ${role}?
+
+Format your response as a JSON object with keys like "skills_feedback", "experience_feedback", "education_certification_feedback".
+    `
+}

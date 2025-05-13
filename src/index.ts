@@ -18,6 +18,7 @@ if (dotenvResult.error) {
 
 import express from 'express';
 // import 'dotenv/config';
+import cors from 'cors';
 import sentimentRoute from '../routes/sentiment';
 import textsSentimentsRoute from '../routes/texts-sentiments';
 import text2textGenartionRoute from '../routes/text2text-generation';
@@ -28,6 +29,10 @@ import resumeExperiencesRoute from '../routes/resume-experiences';
 import resumeGeminiRoute from '../routes/resume-gemini';
 
 const app = express();
+app.use(cors({
+  origin: ['http://localhost:3000', 'http://localhost:3001'] // Allow requests from your frontend
+}));
+
 app.use(express.json());
 
 app.use('/sentiment', sentimentRoute);
