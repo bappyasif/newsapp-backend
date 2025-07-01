@@ -175,8 +175,16 @@ Provide actionable feedback and suggestions for improvement related to the "${ro
 - Interests: How can the candidate's interests align with a ${role}?
 - Achievements: How can the candidate's achievements demonstrate their relevant skills for a ${role}?
 - References: How can the candidate's references demonstrate their relevant skills for a ${role}?
+- - ATS: calculate ATS score (out of 10) before and after reflecting then  adjusted resume as per provided feedback. Suggestions and improvements for ATS score
 - Summary: How can the candidate's summary demonstrate their relevant skills for a ${role}?
 
 Format your response as a JSON object with keys in lowercase.
     `
 }
+
+// - ATS: calculate ATS score (out of 10) before and after reflecting then  adjusted resume as per provided feedback. Also suggest ways to improve ATS score
+
+// - ATS: calculate ATS score (out of 10) before and after reflecting then  adjusted resume as per provided feedback. Suggestions and improvements for ATS score
+
+// - ATS score: calculate ATS score (out of 10) after reflecting and adjusted resume as per feedback
+// - ATS improvements: Suggest ways to improve ATS score
