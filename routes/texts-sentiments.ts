@@ -12,9 +12,7 @@ const loadModel = async () => {
             console.log("Loading sentiment model...");
             sentimentAnalyzer = await pipeline(
                 "sentiment-analysis",
-                // 'Xenova/distilbert-base-uncased-finetuned-sst-2-english'
                 "Xenova/twitter-roberta-base-sentiment-latest"
-                // 'Xenova/robertuito-sentiment-analysis'
             );
             console.log("Sentiment model loaded");
         })();
@@ -39,8 +37,6 @@ router.post("/", async (req: any, res: any) => {
         const sentimentResults = sentiments.map(
             (sentiment: any) => sentiment[0]
         );
-
-        console.log("Sentiment Results:", sentiments, sentimentResults);
 
         res.status(200).json({ sentiments: sentimentResults });
     } catch (err) {
