@@ -21,17 +21,20 @@ import express from 'express';
 import cors from 'cors';
 import sentimentRoute from '../routes/sentiment';
 import textsSentimentsRoute from '../routes/texts-sentiments';
+import scrapeTnytRoute from '../routes/scrape-tnyt';
 
 const app = express();
 app.use(cors({
-  origin: ['http://localhost:3000', 'http://localhost:3001'] // Allow requests from your frontend
+  origin: ['http://localhost:3000', 'http://localhost:3001', "https://newsapp-backend-pink.vercel.app/scrape-tnyt"] // Allow requests from your frontend
 }));
 
 app.use(express.json());
 
 app.use('/sentiment', sentimentRoute);
 app.use('/texts-sentiments', textsSentimentsRoute);
+app.use('/scrape-tnyt', scrapeTnytRoute);
 
+// Handle 404 for undefined routes
 app.use((req, res) => {
   res.status(404).json({ error: 'Route not found' });
 });
